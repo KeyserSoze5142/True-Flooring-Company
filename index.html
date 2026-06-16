@@ -1262,7 +1262,48 @@ document.querySelectorAll('.filter-btn').forEach(function(btn){
         document.querySelectorAll('.gal-item').forEach(function(item){ item.style.display=(f==='all'||item.dataset.type===f)?'':'none'; });
     });
 });
-function handleSubmit(e){ e.preventDefault(); document.getElementById('quoteForm').style.display='none'; document.getElementById('formSuccess').style.display='block'; }
+async function handleSubmit(e){
+    e.preventDefault();
+    var btn = e.target.querySelector('button[type="submit"]');
+    var origText = btn.textContent;
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+
+    var form = document.getElementById('quoteForm');
+    var data = {
+        access_key: "YOUR_WEB3FORMS_ACCESS_KEY",
+        subject: "New Free Estimate Request — True Flooring Company",
+        from_name: "True Flooring Website",
+        name:    (document.getElementById('fName').value + ' ' + document.getElementById('lName').value).trim(),
+        phone:   document.getElementById('fPhone').value,
+        email:   document.getElementById('fEmail').value,
+        address: document.getElementById('fAddress').value,
+        service: document.getElementById('fService').value,
+        sqft:    document.getElementById('fSqft').value,
+        message: document.getElementById('fMessage').value
+    };
+
+    try {
+        var res = await fetch('https://api.web3forms.com/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        var json = await res.json();
+        if (json.success) {
+            form.style.display = 'none';
+            document.getElementById('formSuccess').style.display = 'block';
+        } else {
+            btn.textContent = origText;
+            btn.disabled = false;
+            alert('Something went wrong. Please call us at (205) 886-3795 or email trueflooringcompany@gmail.com.');
+        }
+    } catch(err) {
+        btn.textContent = origText;
+        btn.disabled = false;
+        alert('Network error. Please call us at (205) 886-3795 or email trueflooringcompany@gmail.com.');
+    }
+}
 var observer=new IntersectionObserver(function(entries){ entries.forEach(function(entry){ if(entry.isIntersecting) entry.target.classList.add('visible'); }); },{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
 function triggerAnimations(){ document.querySelectorAll('.page.active .animate-up').forEach(function(el){ observer.observe(el); var r=el.getBoundingClientRect(); if(r.top<window.innerHeight-40) el.classList.add('visible'); }); }
 document.addEventListener('DOMContentLoaded',function(){ setTimeout(triggerAnimations,100); document.querySelectorAll('.stats-grid .stat, .testi-grid .testi, .values-grid .val-card, .svc-grid .svc-card, .offer-grid .offer-card').forEach(function(el,i){ el.style.transitionDelay=(i*70)+'ms'; }); });
